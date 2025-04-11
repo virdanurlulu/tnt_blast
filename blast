@@ -1,0 +1,99 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# Membuat figure dan axis
+fig, ax = plt.subplots(figsize=(6, 3))
+
+# Koordinat awal untuk dua blok
+x1 = np.linspace(-2, -1, 100)  # Blok A
+x2 = np.linspace(1, 2, 100)    # Blok B
+y = np.zeros_like(x1)
+
+# Plot awal
+line1, = ax.plot(x1, y, color='blue', lw=3)
+line2, = ax.plot(x2, y, color='red', lw=3)
+ax.set_xlim(-3, 3)
+ax.set_ylim(-1, 1)
+ax.axvline(0, color='black', linestyle='--', lw=1.5, label='Sesar')
+ax.legend(loc='upper right')
+ax.axis('off')
+
+# Fungsi untuk animasi
+def update(frame):
+    shift = 0.01 * frame  # Perpindahan mendatar seiring waktu
+    line1.set_xdata(x1 - shift)  # Blok A bergeser ke kiri
+    line2.set_xdata(x2 + shift)  # Blok B bergeser ke kanan
+    return line1, line2
+
+# Membuat animasi
+ani = FuncAnimation(fig, update, frames=100, interval=50, blit=True)
+
+# Menampilkan animasi
+plt.show()
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from IPython.display import Image
+
+# Membuat figure dan axes
+fig, ax = plt.subplots(figsize=(6, 4))  # ukuran figure bisa disesuaikan
+
+# Menetapkan batas sumbu agar area tetap konstan selama animasi
+ax.set_xlim(-6, 6)    # rentang sumbu x dari -6 sampai 6
+ax.set_ylim(-2, 2)    # rentang sumbu y dari -2 sampai 2
+ax.set_aspect('equal')  # skala sumbu x dan y dibuat sama agar tidak distorsi
+
+# Menggambar garis sesar (misal di y=0 sebagai garis datar horizontal)
+ax.axhline(0, color='k', linewidth=1, linestyle='--')  # garis putus-putus hitam di y=0
+
+# Membuat dua blok batuan sebagai rectangle
+top_block = plt.Rectangle((-5, 0), 10, 2, facecolor='orange', edgecolor='black')
+bottom_block = plt.Rectangle((-5, -2), 10, 2, facecolor='blue', edgecolor='black')
+
+# Menambahkan blok ke axes
+ax.add_patch(top_block)
+ax.add_patch(bottom_block)
+
+# Menambahkan beberapa teks/label untuk konteks (opsional)
+ax.text(0, 1.1, "Blok Atas (Utara)", ha='center', va='bottom', fontsize=9)
+ax.text(0, -1.1, "Blok Bawah (Selatan)", ha='center', va='top', fontsize=9)
+ax.text(5.5, 0.1, "Sesar Citarik", ha='right', va='bottom', fontsize=9, rotation=0)
+
+# Parameter animasi
+total_frames = 80      # total jumlah frame animasi
+lock_frames = 50       # jumlah frame saat patahan terkunci (tidak ada gerakan)
+slip_frames = 10       # jumlah frame selama terjadi slip (gerakan cepat)
+slip_distance = 2.0    # jarak pergeseran (dalam satuan koordinat) selama gempa untuk masing-masing blok
+
+# Fungsi update animasi
+def update(frame):
+    if frame < lock_frames:
+        # Sebelum gempa (patahan terkunci): tidak ada pergeseran
+        offset_fraction = 0.0
+    elif frame < lock_frames + slip_frames:
+        # Saat gempa berlangsung: menghitung fraksi progress slip (0 hingga 1)
+        offset_fraction = (frame - lock_frames) / slip_frames
+    else:
+        # Setelah gempa (pasca slip): blok sudah bergeser penuh (100% dari slip_distance)
+        offset_fraction = 1.0
+
+    # Hitung offset aktual untuk tiap blok
+    top_offset = -slip_distance * offset_fraction      # blok atas bergerak ke kiri (negatif x)
+    bottom_offset = slip_distance * offset_fraction    # blok bawah bergerak ke kanan (positif x)
+
+    # Perbarui posisi blok dengan offset
+    top_block.set_x(-5 + top_offset)
+    bottom_block.set_x(-5 + bottom_offset)
+    return top_block, bottom_block  # kembalikan objek yang berubah
+
+# Membuat animasi menggunakan FuncAnimation
+anim = animation.FuncAnimation(
+    fig,            # figure objek yang akan dianimasikan
+    update,         # fungsi update yang dipanggil tiap frame
+    frames=total_frames,   # jumlah frame dalam animasi
+    interval=100,   # interval antar frame dalam milisecond (100 ms = 0.1 detik per frame)
+    blit=True       # blit=True untuk mengupdate hanya bagian yang berubah (lebih efisien)
+)
+
